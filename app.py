@@ -21,6 +21,30 @@ def load_data():
         st.error(f"An error occurred while loading data: {e}")
         return None, None
 
+# Function to get book name based on ISBN
+def get_book_name(isbn, books):
+    book_name = books.loc[books['ISBN'] == isbn, 'Book-Title'].values
+    return book_name[0] if len(book_name) > 0 else "Unknown Title"
+
+# Function to recommend books for a user
+def recommend_books_for_user(user_id, ratings, books, num_recommendations=5):
+    # Filter ratings for the specified user
+    user_ratings = ratings[ratings['User-ID'] == user_id]
+
+    if user_ratings.empty:
+        return []  # No ratings found for this user
+
+    # Get top-rated books by this user
+    top_rated_books = user_ratings.sort_values(by='Book-Rating', ascending=False).head(10)
+
+    # Extract ISBNs of top-rated books
+    recommended_books_isbn = top_rated_books['ISBN'].tolist()
+
+    # Get book names for recommended ISBNs
+    recommended_books_names = [get_book_name(isbn, books) for isbn in recommended_books_isbn]
+
+    return recommended_books_names[:num_recommendations]
+
 # Main function to run the app
 def main():
     # Load data
